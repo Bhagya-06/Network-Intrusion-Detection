@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon-32x32.png">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <title>Network Intrusion Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px; /* Remove any default padding */
+            margin: 0; /* Remove any default margin */
+            height: 97vh; /* Ensure the body takes the full viewport height */
+            width: 100vw; /* Ensure the body takes the full viewport width */
+            overflow: hidden; 
+            background-image: url('background.jpg');
+            background-repeat: no-repeat; /* Do not repeat the image */
+            background-size: cover; /* Resize the background image to cover the entire container */
+        }
+        h1 {
+            text-align: center;
+            color: rgb(255, 255, 255);
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .form-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: rgb(252, 252, 252);
+        }
+
+        .form-container input {
+            width: 95%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-container button {
+            padding: 10px 15px;
+            background-color: #0f8fff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .form-container button:hover {
+            background-color: #034485;
+        }
+
+        .loader {
+            width: 60px;
+            height: 24px;
+            vertical-align: middle;
+            display: none;
+        }
+
+        .result-container {
+            display: none;
+            width: 100%; /* Make it the same width as the form container */
+            max-width: 600px; /* Ensure it doesn't exceed form container width */
+            margin: 20px auto; /* Center the result container */
+            padding: 15px; /* Add some padding for spacing */
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            height: auto; /* Let the height adjust based on content */
+        }
+
+        .malicious {
+            margin: 20px auto;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 8px;
+            text-align: center;
+            height: auto;
+            color: red;
+            border: 2px solid red;
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+
+        .benign {
+            margin: 20px auto;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 8px;
+            color: rgb(0, 140, 0);
+            border: 2px solid green;
+            text-align: center;
+            height: auto;
+            background-color: rgb(180, 253, 180);
+        }
+
+        .outlier {
+            margin: 20px auto;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 8px;
+            text-align: center;
+            height: auto;
+            color: orange;
+            border: 2px solid orange;
+            background-color: rgba(255, 165, 0, 0.1);
+        }
+
+        .unexpected {
+            color: gray;
+            border: 2px solid gray;
+            padding: 10px;
+            background-color: rgba(169, 169, 169, 0.1);
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Network Intrusion Detection</h1>
+
+    <div class="form-container">
+        <label for="src_port">Source Port</label>
+        <input type="number" id="src_port" placeholder="Enter source port" required>
+
+        <label for="dest_port">Destination Port</label>
+        <input type="number" id="dest_port" placeholder="Enter destination port" required>
+
+        <label for="src_ip">Source IP</label>
+        <input type="number" id="src_ip" placeholder="Enter source IP (as numeric value)" required>
+        
+        <label for="dest_ip">Destination IP</label>
+        <input type="number" id="dest_ip" placeholder="Enter destination IP (as numeric value)" required>        
+
+        <label for="bytes_out">Bytes Out</label>
+        <input type="number" id="bytes_out" placeholder="Enter bytes transmitted" required>
+
+        <div style="display: flex; align-items: center;">
+            <button id="predictBtn">Predict</button>
+            <img id="loading" src="loader.gif" alt="Loading..." class="loader">
+        </div>
+    </div>
+
+    <div class="result-container" id="result-container">
+        <!-- Prediction result will appear here -->
+    </div>
+
+    <script>
+    document.getElementById('predictBtn').addEventListener('click', async () => {
+    const srcPort = document.getElementById('src_port').value;
+    const destPort = document.getElementById('dest_port').value;
+    const srcIp = document.getElementById('src_ip').value;
+    const destIp = document.getElementById('dest_ip').value;
+    const bytesOut = document.getElementById('bytes_out').value;
+
+    // Validate if all fields are filled in
+    if (!srcPort || !destPort || !srcIp || !destIp || !bytesOut) {
+        alert("Please fill in all fields!");
+        return;
+    }
+
+    // Show loader
+    const loader = document.getElementById('loading');
+    loader.style.display = 'inline-block';
+    document.getElementById('result-container').innerHTML = '';
+
+    // Prepare data to send to backend
+    const data = {
+        src_port: parseInt(srcPort),
+        dest_port: parseInt(destPort),
+        src_ip: parseInt(srcIp),
+        dest_ip: parseInt(destIp),
+        bytes_out: parseInt(bytesOut)
+    };
+
+    try {
+        // Send data to backend
+        const response = await fetch('http://127.0.0.1:5000/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        // Hide loader and show result
+        loader.style.display = 'none';
+        document.getElementById('result-container').style.display = 'block';
+
+        let resultMessage = '';
+        let resultClass = '';
+
+        if (result.prediction === 'Malicious') {
+            resultMessage = '&#10060; Malicious activity detected. Immediate attention required!';
+            resultClass = 'malicious'; // Add specific CSS for malicious
+        } else if (result.prediction === 'Benign') {
+            resultMessage ='&#9989; No intrusion detected. All systems are normal.';
+            resultClass = 'benign'; // Add specific CSS for benign
+        } else if (result.prediction === 'Outlier') {
+            resultMessage = '&#10071; Anomalous behavior detected. Further investigation needed.';
+            resultClass = 'outlier'; // Add specific CSS for outlier
+        } else {
+            resultMessage = `Unexpected Response: ${JSON.stringify(result)}`;
+            resultClass = 'unexpected'; // Add CSS for unexpected response
+        }
+
+        document.getElementById('result-container').innerHTML = `
+            <h3>${resultMessage}</h3>
+        `;
+        document.getElementById('result-container').className = resultClass;
+
+    } catch (error) {
+        // Hide loader and show error message
+        loader.style.display = 'none';
+        document.getElementById('result-container').innerHTML = `
+            <h3>Error: Could not connect to the backend</h3>
+        `;
+    }
+});
+
+    </script>
+
+</body>
+</html>
