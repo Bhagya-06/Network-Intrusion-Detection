@@ -188,13 +188,13 @@
 
     try {
         // Send data to backend
-        const response = await fetch('http://127.0.0.1:5000/predict', {
+        const backendURL = 'https://network-intrusion-detection-9p8m.onrender.com';
+        const response = await fetch(`${backendURL}/predict`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+
 
         const result = await response.json();
 
