@@ -4,7 +4,7 @@ from h2o.estimators import H2ORandomForestEstimator
 from flask_cors import CORS
 
 # Initialize H2O
-h2o.init(ip="0.0.0.0", port=54321)
+h2o.init()
 
 # Load the pre-trained model (change this path to where your model is saved)
 model = h2o.load_model("DRF_model_python_1734776076049_1")
