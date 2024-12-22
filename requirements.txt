@@ -1,4 +1,3 @@
-Flask==2.2.3
+Flask
 flask-cors
-h2o==3.34.0.2
-python-dotenv==1.0.0
+h2o
