@@ -1,4 +1,4 @@
-web: gunicorn app:app
+gunicorn
 Flask
 flask-cors
 h2o
