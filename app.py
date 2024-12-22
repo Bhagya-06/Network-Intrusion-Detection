@@ -7,7 +7,7 @@ from flask_cors import CORS
 h2o.init()
 
 # Load the pre-trained model (change this path to where your model is saved)
-model = h2o.load_model("C:/Users/TIKSHANA B/Desktop/Miniproject/ntwintrusion/DRF_model_python_1734776076049_1")
+model = h2o.load_model("DRF_model_python_1734776076049_1")
 
 # Create Flask app
 app = Flask(__name__)
